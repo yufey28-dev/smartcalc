@@ -24,9 +24,4 @@ def explain_integral(expr, result):
         return response.generations[0].text.strip()
 
     except Exception as e:
-        return f"""
-AI временно недоступен.
-
-Интеграл: {expr}
-Результат: {result}
-"""
+        return f"AI ошибка: {str(e)}"
