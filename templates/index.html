@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Калькулятор интегралов</h2>
+
+<form method="POST">
+    <input type="text" name="expression" class="form-control mb-2" placeholder="Введите выражение">
+    <button class="btn btn-primary">Решить</button>
+</form>
+
+{% if result %}
+    <div class="alert alert-success mt-3">
+        <b>Ответ:</b> {{ result }}
+    </div>
+
+    <div class="alert alert-info">
+        <b>Объяснение:</b> {{ explanation }}
+    </div>
+{% endif %}
+
+{% endblock %}

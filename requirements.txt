@@ -1,0 +1,6 @@
+flask
+sympy
+matplotlib
+bcrypt
+requests
+cohere

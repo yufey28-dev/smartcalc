@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Админ панель</title>
+</head>
+<body>
+
+<h1>Админ панель</h1>
+
+<a href="/">Главная</a>
+<a href="/logout">Выйти</a>
+
+<h2>Пользователи</h2>
+
+<table border="1">
+    <tr>
+        <th>ID</th>
+        <th>Username</th>
+        <th>Role</th>
+        <th>Действие</th>
+    </tr>
+
+    {% for user in users %}
+    <tr>
+        <td>{{ user[0] }}</td>
+        <td>{{ user[1] }}</td>
+        <td>{{ user[2] }}</td>
+        <td>{{ user[3] }}</td>
+        <td>{{ user[4] }}</td>
+        <td>{{ user[5] }}</td>
+        <td>{{ user[6] }}</td>
+        <td>{{ user[7] }}</td>
+        <td>{{ user[8] }}</td>
+        <td>
+        <a href="/delete_user/{{ user[0] }}">Удалить</a>
+        </td>
+    </tr>
+    {% endfor %}
+
+</table>
+
+</body>
+</html>

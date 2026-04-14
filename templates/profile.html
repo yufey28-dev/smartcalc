@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Профиль</title>
+</head>
+<body>
+
+<h1>Личный кабинет</h1>
+
+<a href="/">Назад</a>
+<a href="/logout">Выйти</a>
+
+<h2>История решений</h2>
+
+{% for item in history %}
+    <p>
+        {{ item[3] }} | {{ item[1] }} = {{ item[2] }}
+    </p>
+{% endfor %}
+
+</body>
+</html>
