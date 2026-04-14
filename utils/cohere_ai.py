@@ -14,7 +14,7 @@ def explain_integral(expr, result):
 Объясняй просто и понятно.
 """
 
-        response = co.generate(
+        response = co.chat(
             model='command-light',
             prompt=prompt,
             max_tokens=200,
