@@ -14,14 +14,14 @@ def explain_integral(expr, result):
 Объясняй просто и понятно.
 """
 
-        response = co.chat(
-            model='command-light',
-            prompt=prompt,
+response = co.chat(
+            model='command-r',        # command-light устарел
+            message=prompt,           # prompt → message
             max_tokens=200,
             temperature=0.7
         )
 
-        return response.generations[0].text.strip()
+        return response.text.strip()  # .generations[0].text → .text
 
     except Exception as e:
         return f"AI ошибка: {str(e)}"
