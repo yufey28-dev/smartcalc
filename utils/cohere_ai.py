@@ -15,7 +15,7 @@ def explain_integral(expr, result):
 """
 
         response = co.chat(
-            model='command-r',
+            model='command-r-08-2024',
             message=prompt,
             max_tokens=200,
             temperature=0.7
