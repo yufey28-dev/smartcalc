@@ -1,7 +1,7 @@
 import cohere
 import os
 
-co = cohere.Client(os.getenv("uRrjKsrQywL9bewB30iAg4JEtQc4uDzSqYcuiPVH"))
+co = cohere.Client(os.getenv("COHERE_API_KEY"))
 
 def explain_integral(expr, result):
     try:
