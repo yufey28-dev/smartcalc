@@ -108,16 +108,13 @@ def login():
         conn = sqlite3.connect("database.db")
         cursor = conn.cursor()
 
-        cursor.execute("SELECT password FROM users WHERE username=?", (username,))
+        cursor.execute("SELECT password, role FROM users WHERE username=?", (username,))
         user = cursor.fetchone()
         conn.close()
 
         if user and check_password(password, user[0]):
             session["user"] = username
-            # достаём роль из базы и кладём в сессию
-            cursor.execute("SELECT role FROM users WHERE username=?", (username,))
-            role_row = cursor.fetchone()
-            session["role"] = role_row[0] if role_row else "user"
+            session["role"] = user[1]
             return redirect(url_for("index"))
         else:
             return "Неверные данные!"
