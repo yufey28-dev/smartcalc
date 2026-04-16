@@ -1,43 +1,78 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Админ панель</title>
-</head>
-<body>
+{% extends "base.html" %}
+{% block content %}
 
-<h1>Админ панель</h1>
+<div class="container">
 
-<a href="/">Главная</a>
-<a href="/logout">Выйти</a>
+  <div class="card" style="margin-bottom: 1rem;">
+    <div style="display:flex; align-items:center; justify-content:space-between;">
+      <div>
+        <div style="font-size:20px; font-weight:600; color:#534AB7;">Панель администратора</div>
+        <div style="font-size:13px; color:#888; margin-top:4px;">Управление пользователями</div>
+      </div>
+      <div style="background:#EEEDFE; border-radius:8px; padding:8px 16px; font-size:13px; color:#3C3489;">
+        Всего: <strong>{{ users|length }}</strong>
+      </div>
+    </div>
+  </div>
 
-<h2>Пользователи</h2>
+  <div class="card" style="padding: 0; overflow: hidden;">
+    <table class="history-table">
+      <thead>
+        <tr style="background:#f8f8fc;">
+          <th style="padding: 12px 16px;">ID</th>
+          <th style="padding: 12px 16px;">Пользователь</th>
+          <th style="padding: 12px 16px;">Роль</th>
+          <th style="padding: 12px 16px; text-align:right;">Действие</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for u in users %}
+        <tr style="transition: background 0.1s;">
+          <td style="padding:12px 16px; color:#aaa; font-family:monospace;">{{ u[0] }}</td>
+          <td style="padding:12px 16px;">
+            <div style="display:flex; align-items:center; gap:10px;">
+              <div style="width:32px; height:32px; border-radius:50%;
+                background:#EEEDFE; color:#3C3489;
+                display:flex; align-items:center; justify-content:center;
+                font-size:13px; font-weight:500; flex-shrink:0;">
+                {{ u[1][0]|upper }}
+              </div>
+              <span style="font-size:14px;">{{ u[1] }}</span>
+            </div>
+          </td>
+          <td style="padding:12px 16px;">
+            {% if u[2] == 'admin' %}
+            <span style="background:#EEEDFE; color:#3C3489;
+              padding:3px 10px; border-radius:6px; font-size:12px; font-weight:500;">
+              admin
+            </span>
+            {% else %}
+            <span style="background:#f4f4f8; color:#888;
+              padding:3px 10px; border-radius:6px; font-size:12px;">
+              user
+            </span>
+            {% endif %}
+          </td>
+          <td style="padding:12px 16px; text-align:right;">
+            {% if u[2] != 'admin' %}
+            <a href="/delete_user/{{ u[0] }}"
+              onclick="return confirm('Удалить {{ u[1] }}?')"
+              style="font-size:13px; color:#A32D2D; text-decoration:none;
+                padding:5px 12px; border:1px solid #f7c1c1;
+                border-radius:6px; background:#fff; transition: background 0.15s;"
+              onmouseover="this.style.background='#FCEBEB'"
+              onmouseout="this.style.background='#fff'">
+              Удалить
+            </a>
+            {% else %}
+            <span style="font-size:12px; color:#ccc;">—</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 
-<table border="1">
-    <tr>
-        <th>ID</th>
-        <th>Username</th>
-        <th>Role</th>
-        <th>Действие</th>
-    </tr>
-
-    {% for user in users %}
-    <tr>
-        <td>{{ user[0] }}</td>
-        <td>{{ user[1] }}</td>
-        <td>{{ user[2] }}</td>
-        <td>{{ user[3] }}</td>
-        <td>{{ user[4] }}</td>
-        <td>{{ user[5] }}</td>
-        <td>{{ user[6] }}</td>
-        <td>{{ user[7] }}</td>
-        <td>{{ user[8] }}</td>
-        <td>
-        <a href="/delete_user/{{ user[0] }}">Удалить</a>
-        </td>
-    </tr>
-    {% endfor %}
-
-</table>
-
-</body>
-</html>
+</div>
+{% endblock %}

@@ -1,22 +1,85 @@
 {% extends "base.html" %}
-
 {% block content %}
 
-<h2>Калькулятор интегралов</h2>
+<div class="container">
+  <form method="POST" action="/">
 
-<form method="POST">
-    <input type="text" name="expression" class="form-control mb-2" placeholder="Введите выражение">
-    <button class="btn btn-primary">Решить</button>
-</form>
+    <div class="card">
+      <div class="card-label">Переменная интегрирования</div>
+      <div class="var-btns">
+        {% for v in ['x','y','z','t','n'] %}
+        <button type="button" class="var-btn {% if (var or 'x') == v %}active{% endif %}"
+          onclick="setVar(this,'{{ v }}')">{{ v }}</button>
+        {% endfor %}
+      </div>
+      <input type="hidden" name="variable" id="var-input" value="{{ var or 'x' }}">
 
-{% if result %}
-    <div class="alert alert-success mt-3">
-        <b>Ответ:</b> {{ result }}
+      <div class="card-label">Быстрый ввод</div>
+      <div class="sym-grid">
+        <button type="button" class="sym-btn" onclick="ins('**2')">x²</button>
+        <button type="button" class="sym-btn" onclick="ins('**3')">x³</button>
+        <button type="button" class="sym-btn" onclick="ins('**')">xⁿ</button>
+        <button type="button" class="sym-btn" onclick="ins('sqrt()')">√</button>
+        <button type="button" class="sym-btn" onclick="insFrac()">a/b</button>
+        <button type="button" class="sym-btn" onclick="ins('()')">( )</button>
+        <button type="button" class="sym-btn" onclick="ins('sin()')">sin</button>
+        <button type="button" class="sym-btn" onclick="ins('cos()')">cos</button>
+        <button type="button" class="sym-btn" onclick="ins('tan()')">tan</button>
+        <button type="button" class="sym-btn" onclick="ins('exp()')">eˣ</button>
+        <button type="button" class="sym-btn" onclick="ins('log()')">log</button>
+        <button type="button" class="sym-btn" onclick="ins('1/')">1/x</button>
+      </div>
+
+      <div class="card-label">Выражение</div>
+      <div class="expr-row">
+        <input class="expr-input" id="expr" name="expression"
+          type="text" placeholder="например: x**2 + sin(x)"
+          value="{{ request.form.get('expression', '') }}" />
+        <button type="button" class="clear-btn"
+          onclick="document.getElementById('expr').value=''">Очистить</button>
+      </div>
+      <button type="submit" class="submit-btn">Вычислить интеграл</button>
     </div>
 
-    <div class="alert alert-info">
-        <b>Объяснение:</b> {{ explanation }}
+  </form>
+
+  {% if result is not none %}
+  <div class="notebook">
+    <div class="notebook-line">
+      <span class="integral-sign">∫</span>
+      {{ request.form.get('expression','') }} d{{ var or 'x' }}
     </div>
-{% endif %}
+    <div class="notebook-line">
+      = <span class="result-val">{{ result }} + C</span>
+    </div>
+  </div>
+
+  {% if explanation %}
+  <div class="ai-card">
+    <div class="ai-label">AI объяснение</div>
+    <div class="ai-text">{{ explanation }}</div>
+  </div>
+  {% endif %}
+  {% endif %}
+
+</div>
+
+<script>
+  function setVar(btn, v) {
+    document.querySelectorAll('.var-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('var-input').value = v;
+  }
+  function ins(sym) {
+    const el = document.getElementById('expr');
+    const s = el.selectionStart, e = el.selectionEnd;
+    el.value = el.value.slice(0, s) + sym + el.value.slice(e);
+    el.focus();
+    el.selectionStart = el.selectionEnd = s + sym.length;
+  }
+  function insFrac() {
+    ins('()/()');
+  }
+</script>
 
 {% endblock %}

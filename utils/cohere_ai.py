@@ -4,7 +4,6 @@ import random
 
 co = cohere.Client(os.getenv("COHERE_API_KEY"))
 
-# Заготовленные объяснения для популярных интегралов
 CACHED_EXPLANATIONS = {
     "x": [
         "Интеграл от x равен x²/2 + C. Используем правило степени: увеличиваем показатель на 1 и делим на него.",
@@ -16,6 +15,9 @@ CACHED_EXPLANATIONS = {
     ],
     "x**3": [
         "∫x³ dx = x⁴/4 + C. Увеличиваем степень 3 до 4, делим на 4.",
+    ],
+    "x**4": [
+        "∫x⁴ dx = x⁵/5 + C. Правило степени: 4+1=5, делим на 5.",
     ],
     "sin(x)": [
         "∫sin(x) dx = -cos(x) + C. Интеграл синуса — минус косинус, это базовая формула.",
@@ -42,13 +44,12 @@ CACHED_EXPLANATIONS = {
     "tan(x)": [
         "∫tan(x) dx = -ln|cos(x)| + C.",
     ],
-    "x**4": [
-        "∫x⁴ dx = x⁵/5 + C. Правило степени: 4+1=5, делим на 5.",
+    "x**2+1": [
+        "∫(x²+1) dx = x³/3 + x + C. Интегрируем каждое слагаемое отдельно.",
     ],
 }
 
 def get_cached_explanation(expr, result):
-    """Ищет заготовленный ответ для выражения"""
     key = expr.strip().replace(" ", "")
     if key in CACHED_EXPLANATIONS:
         return random.choice(CACHED_EXPLANATIONS[key])
@@ -56,19 +57,16 @@ def get_cached_explanation(expr, result):
 
 def explain_integral(expr, result):
     try:
-        # Сначала проверяем кэш
         cached = get_cached_explanation(expr, result)
 
         if cached:
-            # Просим Cohere слегка перефразировать готовый ответ
-            prompt = f"""Перефразируй это математическое объяснение, сохранив все формулы и суть. 
-Только перефразируй, не добавляй ничего лишнего, а также уложись в лимит 100 слов:
+            prompt = f"""Перефразируй это математическое объяснение, сохранив все формулы и суть.
+Только перефразируй, не добавляй ничего лишнего:
 
 {cached}"""
         else:
-            # Для незнакомых интегралов — полный запрос
             prompt = f"""Ты преподаватель математики.
-Объясни  интеграл:
+Объясни пошагово решение интеграла:
 {expr} = {result}
 Объясняй просто и понятно."""
 
@@ -82,7 +80,6 @@ def explain_integral(expr, result):
         return response.text.strip()
 
     except Exception as e:
-        # Если API недоступен — возвращаем кэш напрямую (без перефразирования)
         cached = get_cached_explanation(expr, result)
         if cached:
             return cached

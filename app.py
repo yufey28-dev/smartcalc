@@ -1,10 +1,7 @@
-from flask import Flask, render_template, request
-from utils.math_solver import solve_integral
-from utils.ai_helper import ai_explain
+from flask import Flask, render_template, request, session, redirect, url_for
 import sqlite3
 from utils.security import hash_password, is_strong_password, check_password
-from flask import session, redirect, url_for
-from utils.history import save_history 
+from utils.history import save_history
 from utils.agents import MultiAgentSystem
 from utils.cohere_ai import explain_integral
 
@@ -34,10 +31,12 @@ def init_db():
     conn.close()
 
 app = Flask(__name__)
-
 app.secret_key = "supersecretkey"
 
 init_db()
+
+# Кэш вычислений
+calc_cache = {}
 
 @app.route("/", methods=["GET", "POST"])
 def index():
@@ -51,18 +50,26 @@ def index():
         expr = request.form.get("expression")
 
         if expr:
-            mas = MultiAgentSystem()
-            result, _ = mas.run(expr)
+            var = request.form.get("variable", "x")
+            cache_key = f"{expr}_{var}"
 
-            explanation = explain_integral(expr, result)
-            save_history(session["user"], expr, result)
-    
+        if cache_key in calc_cache:
+            result = calc_cache[cache_key]
+        else:
+            mas = MultiAgentSystem()
+            result, _ = mas.run(expr, var)
+            calc_cache[cache_key] = result
+
+        explanation = explain_integral(expr, result)
+        save_history(session["user"], expr, result)        
+
     return render_template(
-    "index.html",
-    result=result,
-    explanation=explanation,
-    session_user=session.get("user")
-)
+        "index.html",
+        result=result,
+        explanation=explanation,
+        session_user=session.get("user"),
+        var=request.form.get("variable", "x")
+    )
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
@@ -71,7 +78,7 @@ def register():
         password = request.form["password"]
 
         if not is_strong_password(password):
-            return "Пароль слишком слабый!"
+            return "Пароль слишком слабый! Минимум 8 символов, 1 заглавная буква, 1 цифра."
 
         hashed = hash_password(password).decode()
 
@@ -88,9 +95,9 @@ def register():
             return "Пользователь уже существует!"
 
         conn.close()
-        return "Регистрация успешна!"
+        return redirect(url_for("login"))
 
-    return render_template("register.html", user=session.get("user") )
+    return render_template("register.html", user=session.get("user"))
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -103,11 +110,10 @@ def login():
 
         cursor.execute("SELECT password FROM users WHERE username=?", (username,))
         user = cursor.fetchone()
-
         conn.close()
 
         if user and check_password(password, user[0]):
-            session["user"] = username   # ← ВОТ ГЛАВНОЕ
+            session["user"] = username
             return redirect(url_for("index"))
         else:
             return "Неверные данные!"
@@ -121,6 +127,9 @@ def logout():
 
 @app.route("/profile")
 def profile():
+    if "user" not in session:
+        return redirect(url_for("login"))
+
     conn = sqlite3.connect("database.db")
     cursor = conn.cursor()
 
@@ -143,18 +152,14 @@ def admin():
     conn = sqlite3.connect("database.db")
     cursor = conn.cursor()
 
-    # текущий пользователь
     cursor.execute("SELECT * FROM users WHERE username=?", (session["user"],))
     current = cursor.fetchone()
 
-    # проверка на админа
     if not current or current[3] != "admin":
         return "Доступ запрещён"
 
-    # получаем всех пользователей
     cursor.execute("SELECT id, username, role FROM users")
     users = cursor.fetchall()
-
     conn.close()
 
     return render_template("admin.html", users=users, user=session.get("user"))
@@ -167,14 +172,12 @@ def delete_user(user_id):
     conn = sqlite3.connect("database.db")
     cursor = conn.cursor()
 
-    # проверка админа
     cursor.execute("SELECT * FROM users WHERE username=?", (session["user"],))
     current = cursor.fetchone()
 
     if not current or current[3] != "admin":
         return "Доступ запрещён"
 
-    # нельзя удалить себя
     if current[0] == user_id:
         return "Нельзя удалить самого себя"
 
