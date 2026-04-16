@@ -114,6 +114,10 @@ def login():
 
         if user and check_password(password, user[0]):
             session["user"] = username
+            # достаём роль из базы и кладём в сессию
+            cursor.execute("SELECT role FROM users WHERE username=?", (username,))
+            role_row = cursor.fetchone()
+            session["role"] = role_row[0] if role_row else "user"
             return redirect(url_for("index"))
         else:
             return "Неверные данные!"

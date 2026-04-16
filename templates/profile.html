@@ -1,22 +1,57 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Профиль</title>
-</head>
-<body>
+{% extends "base.html" %}
+{% block content %}
 
-<h1>Личный кабинет</h1>
+<div class="container">
 
-<a href="/">Назад</a>
-<a href="/logout">Выйти</a>
+  <div class="card" style="margin-bottom: 1rem;">
+    <div style="display:flex; align-items:center; gap:14px;">
+      <div style="width:44px; height:44px; border-radius:50%;
+        background:#EEEDFE; color:#3C3489;
+        display:flex; align-items:center; justify-content:center;
+        font-size:18px; font-weight:500;">
+        {{ session.get('user', '?')[0]|upper }}
+      </div>
+      <div>
+        <div style="font-size:18px; font-weight:600; color:#1a1a2e;">
+          {{ session.get('user') }}
+        </div>
+        <div style="font-size:13px; color:#888;">
+          История вычислений: {{ history|length }}
+        </div>
+      </div>
+    </div>
+  </div>
 
-<h2>История решений</h2>
+  {% if history %}
+  <div class="card" style="padding:0; overflow:hidden;">
+    <table class="history-table">
+      <thead>
+        <tr style="background:#f8f8fc;">
+          <th style="padding:12px 16px;">Выражение</th>
+          <th style="padding:12px 16px;">Результат</th>
+          <th style="padding:12px 16px;">Время</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for h in history %}
+        <tr>
+          <td style="padding:12px 16px;">∫ {{ h[2] }} dx</td>
+          <td style="padding:12px 16px; color:#0F6E56; font-weight:500;">
+            {{ h[3] }} + C
+          </td>
+          <td style="padding:12px 16px; color:#aaa; font-size:13px;">
+            {{ h[4][:16] }}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="card" style="text-align:center; color:#888; padding:2rem;">
+    Вы ещё ничего не вычисляли. <a href="/" style="color:#534AB7;">Попробуйте!</a>
+  </div>
+  {% endif %}
 
-{% for item in history %}
-    <p>
-        {{ item[3] }} | {{ item[1] }} = {{ item[2] }}
-    </p>
-{% endfor %}
-
-</body>
-</html>
+</div>
+{% endblock %}
