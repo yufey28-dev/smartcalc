@@ -1,9 +1,8 @@
-import google.generativeai as genai
+from groq import Groq
 import os
 import random
 
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-model = genai.GenerativeModel("gemini-2.0-flash")
+client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
 CACHED_EXPLANATIONS = {
     "x": [
@@ -60,12 +59,17 @@ def explain_integral(expr, result):
 {cached}"""
         else:
             prompt = f"""Ты преподаватель математики.
-Объясни интеграл через обычные ответы в лимите 100 слов:
+Объясни интеграл просто в лимите 100 слов:
 {expr} = {result}
 Объясняй просто и понятно на русском языке."""
 
-        response = model.generate_content(prompt)
-        return response.text.strip()
+        response = client.chat.completions.create(
+            model="llama-3.1-8b-instant",
+            messages=[{"role": "user", "content": prompt}],
+            max_tokens=300,
+            temperature=0.7,
+        )
+        return response.choices[0].message.content.strip()
 
     except Exception as e:
         cached = get_cached_explanation(expr, result)

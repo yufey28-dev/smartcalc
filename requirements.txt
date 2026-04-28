@@ -3,5 +3,5 @@ sympy
 matplotlib
 bcrypt
 requests
-google-generativeai
+groq
 gunicorn
