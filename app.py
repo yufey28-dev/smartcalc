@@ -9,7 +9,6 @@ from utils.stats import generate_chart
 def init_db():
     conn = sqlite3.connect("database.db")
     cursor = conn.cursor()
-
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -18,7 +17,6 @@ def init_db():
         role TEXT
     )
     """)
-
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS history (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -33,10 +31,8 @@ def init_db():
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
-
 init_db()
 
-# Кэш вычислений
 calc_cache = {}
 
 @app.route("/", methods=["GET", "POST"])
@@ -46,30 +42,32 @@ def index():
 
     result = None
     explanation = None
+    chart = None
 
     if request.method == "POST":
         expr = request.form.get("expression")
-
         if expr:
             var = request.form.get("variable", "x")
             cache_key = f"{expr}_{var}"
 
-        if cache_key in calc_cache:
-            result = calc_cache[cache_key]
-        else:
-            mas = MultiAgentSystem()
-            result, _ = mas.run(expr, var)
-            calc_cache[cache_key] = result
+            if cache_key in calc_cache:
+                result = calc_cache[cache_key]
+            else:
+                mas = MultiAgentSystem()
+                result, _ = mas.run(expr, var)
+                calc_cache[cache_key] = result
 
-        explanation = explain_integral(expr, result)
-        save_history(session["user"], expr, result)        
+            explanation = explain_integral(expr, result)
+            save_history(session["user"], expr, result)
+            chart = generate_chart()
 
     return render_template(
         "index.html",
         result=result,
         explanation=explanation,
         session_user=session.get("user"),
-        var=request.form.get("variable", "x")
+        var=request.form.get("variable", "x"),
+        chart=chart
     )
 
 @app.route("/register", methods=["GET", "POST"])
@@ -82,10 +80,8 @@ def register():
             return "Пароль слишком слабый! Минимум 8 символов, 1 заглавная буква, 1 цифра."
 
         hashed = hash_password(password).decode()
-
         conn = sqlite3.connect("database.db")
         cursor = conn.cursor()
-
         try:
             cursor.execute(
                 "INSERT INTO users (username, password, role) VALUES (?, ?, ?)",
@@ -94,7 +90,6 @@ def register():
             conn.commit()
         except:
             return "Пользователь уже существует!"
-
         conn.close()
         return redirect(url_for("login"))
 
@@ -108,7 +103,6 @@ def login():
 
         conn = sqlite3.connect("database.db")
         cursor = conn.cursor()
-
         cursor.execute("SELECT password, role FROM users WHERE username=?", (username,))
         user = cursor.fetchone()
         conn.close()
@@ -134,31 +128,16 @@ def profile():
 
     conn = sqlite3.connect("database.db")
     cursor = conn.cursor()
-
     cursor.execute("""
         SELECT * FROM history
         WHERE username=?
         ORDER BY id DESC
     """, (session["user"],))
-
     history = cursor.fetchall()
     conn.close()
 
     return render_template("profile.html", history=history, user=session.get("user"))
 
-@app.route("/stats")
-def stats():
-    if "user" not in session:
-        return redirect(url_for("login"))
-    chart = generate_chart() if result is not None else None
-    return render_template(
-        "index.html",
-        result=result,
-        explanation=explanation,
-        session_user=session.get("user"),
-        var=request.form.get("variable", "x"),
-        chart=chart
-)
 @app.route("/admin")
 def admin():
     if "user" not in session:
@@ -166,7 +145,6 @@ def admin():
 
     conn = sqlite3.connect("database.db")
     cursor = conn.cursor()
-
     cursor.execute("SELECT * FROM users WHERE username=?", (session["user"],))
     current = cursor.fetchone()
 
@@ -186,7 +164,6 @@ def delete_user(user_id):
 
     conn = sqlite3.connect("database.db")
     cursor = conn.cursor()
-
     cursor.execute("SELECT * FROM users WHERE username=?", (session["user"],))
     current = cursor.fetchone()
 
