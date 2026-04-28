@@ -150,9 +150,15 @@ def profile():
 def stats():
     if "user" not in session:
         return redirect(url_for("login"))
-    chart = generate_chart()
-    return render_template("stats.html", chart=chart, user=session.get("user"))
-
+    chart = generate_chart() if result is not None else None
+    return render_template(
+        "index.html",
+        result=result,
+        explanation=explanation,
+        session_user=session.get("user"),
+        var=request.form.get("variable", "x"),
+        chart=chart
+)
 @app.route("/admin")
 def admin():
     if "user" not in session:

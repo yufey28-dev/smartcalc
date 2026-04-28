@@ -55,9 +55,17 @@
   </div>
 
   {% if explanation %}
-  <div class="ai-card">
-    <div class="ai-label">AI объяснение</div>
-    <div class="ai-text">{{ explanation }}</div>
+<div class="ai-card">
+  <div class="ai-label">AI объяснение</div>
+  <div class="ai-text">{{ explanation }}</div>
+</div>
+{% endif %}
+
+  {% if chart %}
+  <div class="card" style="margin-top: 1rem;">
+    <div class="card-label">Популярные интегралы — статистика</div>
+    <img src="data:image/png;base64,{{ chart }}"
+         style="width:100%; border-radius:8px; margin-top:8px;">
   </div>
   {% endif %}
   {% endif %}
