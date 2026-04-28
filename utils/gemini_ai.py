@@ -1,8 +1,9 @@
-import cohere
+import google.generativeai as genai
 import os
 import random
 
-co = cohere.Client(os.getenv("COHERE_API_KEY"))
+genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+model = genai.GenerativeModel("gemini-1.5-flash")
 
 CACHED_EXPLANATIONS = {
     "x": [
@@ -11,7 +12,6 @@ CACHED_EXPLANATIONS = {
     ],
     "x**2": [
         "∫x² dx = x³/3 + C. Правило степени: показатель 2 → становится 3, делим на 3.",
-        "Интеграл от x² — применяем формулу xⁿ → xⁿ⁺¹/(n+1). Получаем x³/3 + C.",
     ],
     "x**3": [
         "∫x³ dx = x⁴/4 + C. Увеличиваем степень 3 до 4, делим на 4.",
@@ -24,28 +24,22 @@ CACHED_EXPLANATIONS = {
         "Интеграл от sin(x) равен -cos(x) + C. Проверить можно взяв производную: (-cos(x))' = sin(x). ✓",
     ],
     "cos(x)": [
-        "∫cos(x) dx = sin(x) + C. Интеграл косинуса — синус. Производная sin(x) = cos(x). ✓",
-        "Косинус интегрируется в синус: ∫cos(x) dx = sin(x) + C.",
+        "∫cos(x) dx = sin(x) + C. Интеграл косинуса — синус.",
     ],
     "exp(x)": [
         "∫eˣ dx = eˣ + C. Экспонента — единственная функция, которая не меняется при интегрировании.",
-        "Интеграл от eˣ снова eˣ + C. Это уникальное свойство экспоненты.",
     ],
     "1/x": [
         "∫(1/x) dx = ln|x| + C. Исключение из правила степени — результат натуральный логарифм.",
-        "Интеграл от 1/x равен ln|x| + C. Модуль нужен, так как логарифм определён только для положительных чисел.",
     ],
     "1": [
         "∫1 dx = x + C. Интеграл от константы 1 — просто x.",
     ],
     "2*x": [
-        "∫2x dx = x² + C. Константа 2 выносится за знак интеграла, затем ∫x dx = x²/2, итого x².",
+        "∫2x dx = x² + C. Константа 2 выносится за знак интеграла.",
     ],
     "tan(x)": [
         "∫tan(x) dx = -ln|cos(x)| + C.",
-    ],
-    "x**2+1": [
-        "∫(x²+1) dx = x³/3 + x + C. Интегрируем каждое слагаемое отдельно.",
     ],
 }
 
@@ -66,17 +60,11 @@ def explain_integral(expr, result):
 {cached}"""
         else:
             prompt = f"""Ты преподаватель математики.
-Объясни интеграл:
+Объясни интеграл через обычные ответы в лимите 100 слов:
 {expr} = {result}
-Объясняй просто и понятно."""
+Объясняй просто и понятно на русском языке."""
 
-        response = co.chat(
-            model='command-r7b-12-2024',
-            message=prompt,
-            max_tokens=200,
-            temperature=0.7
-        )
-
+        response = model.generate_content(prompt)
         return response.text.strip()
 
     except Exception as e:

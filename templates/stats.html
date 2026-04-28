@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+  <div class="card">
+    <div class="card-label">Статистика вычислений</div>
+    {% if chart %}
+    <img src="data:image/png;base64,{{ chart }}"
+         style="width:100%; border-radius:8px; margin-top:8px;">
+    {% else %}
+    <p style="color:#888; text-align:center; padding:2rem;">
+      Пока нет данных. Вычисли несколько интегралов!
+    </p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

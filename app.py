@@ -3,7 +3,8 @@ import sqlite3
 from utils.security import hash_password, is_strong_password, check_password
 from utils.history import save_history
 from utils.agents import MultiAgentSystem
-from utils.cohere_ai import explain_integral
+from utils.gemini_ai import explain_integral
+from utils.stats import generate_chart
 
 def init_db():
     conn = sqlite3.connect("database.db")
@@ -144,6 +145,13 @@ def profile():
     conn.close()
 
     return render_template("profile.html", history=history, user=session.get("user"))
+
+@app.route("/stats")
+def stats():
+    if "user" not in session:
+        return redirect(url_for("login"))
+    chart = generate_chart()
+    return render_template("stats.html", chart=chart, user=session.get("user"))
 
 @app.route("/admin")
 def admin():
