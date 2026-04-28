@@ -394,13 +394,80 @@ body {
   border-bottom: none;
 }
 
-/* Адаптив */
-@media (max-width: 500px) {
-  .sym-grid {
-    grid-template-columns: repeat(4, 1fr);
+/* Адаптив для телефонов */
+@media (max-width: 600px) {
+
+  .navbar {
+    flex-direction: column;
+    gap: 8px;
+    padding: 10px 16px;
   }
+
+  .navbar-links {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
+  }
+
   .navbar-links a {
     padding: 5px 10px;
     font-size: 13px;
+  }
+
+  .container {
+    padding: 0 10px;
+    margin: 1rem auto;
+  }
+
+  .sym-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .var-btn {
+    padding: 5px 12px;
+    font-size: 13px;
+  }
+
+  .expr-row {
+    flex-direction: column;
+  }
+
+  .clear-btn {
+    width: 100%;
+  }
+
+  .notebook {
+    padding: 1rem;
+  }
+
+  .notebook-line {
+    font-size: 14px;
+  }
+
+  .integral-sign {
+    font-size: 24px;
+  }
+
+  .auth-wrap {
+    margin: 1.5rem auto;
+    padding: 0 12px;
+  }
+
+  .auth-card {
+    padding: 1.5rem;
+  }
+
+  .history-table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  .card {
+    padding: 1rem;
+  }
+
+  .ai-card {
+    padding: 0.9rem 1rem;
   }
 }
